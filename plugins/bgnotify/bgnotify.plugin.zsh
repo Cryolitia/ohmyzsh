@@ -60,16 +60,7 @@ function bgnotify_formatted {
 }
 
 function bgnotify_appid {
-  if (( ${+commands[osascript]} )); then
-    osascript -e "tell application id \"$(bgnotify_programid)\"  to get the {id, frontmost, id of front window, visible of front window}" 2>/dev/null
-  elif [[ -n $WAYLAND_DISPLAY ]] && (( ${+commands[swaymsg]} )); then # wayland+sway
-    local app_id=$(bgnotify_find_sway_appid)
-    [[ -n "$app_id" ]] && echo "$app_id" || echo $EPOCHSECONDS
-  elif [[ -z $WAYLAND_DISPLAY ]] && [[ -n $DISPLAY ]] && (( ${+commands[xprop]} )); then
-    xprop -root _NET_ACTIVE_WINDOW 2>/dev/null | cut -d' ' -f5
-  else
-    echo $EPOCHSECONDS
-  fi
+  gdbus call --session --dest org.gnome.Shell --object-path /org/gnome/shell/extensions/FocusedWindow --method org.gnome.shell.extensions.FocusedWindow.Get | cut -c 3- | rev | cut -c4- | rev | jq '.id' 2>/dev/null
 }
 
 
